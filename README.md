@@ -4,6 +4,8 @@ An AI-powered resume analysis tool that evaluates resumes against job descriptio
 
 ### 🚀 Live Demo
 👉 Try it Now on Vercel: https://ai-resume-analyzer-indol.vercel.app/
+🔐 Note:
+Use any username to log in (e.g., testuser) — password can be anything; it’s a demo setup.
 
 ---
 
