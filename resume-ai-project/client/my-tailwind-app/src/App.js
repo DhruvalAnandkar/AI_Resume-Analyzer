@@ -30,7 +30,8 @@ function App() {
     "css",
   ];
 
-  const BACKEND_BASE_URL = "https://ai-resume-analyzer-z5p4.onrender.com/api/login";
+  // Base URL for your backend API (no trailing slash)
+  const API_BASE_URL = "https://ai-resume-analyzer-z5p4.onrender.com/api";
 
   // Login handler
   const handleLogin = async () => {
@@ -40,7 +41,7 @@ function App() {
     }
     setError("");
     try {
-      const res = await axios.post(`${BACKEND_BASE_URL}`, {
+      const res = await axios.post(`${API_BASE_URL}/login`, {
         username,
       });
       setToken(res.data.accessToken);
@@ -88,7 +89,7 @@ function App() {
       try {
         setLoading(true);
         const response = await axios.post(
-          `${BACKEND_BASE_URL}/api/upload`,
+          `${API_BASE_URL}/upload`,
           formData,
           {
             headers: {
