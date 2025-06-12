@@ -30,6 +30,8 @@ function App() {
     "css",
   ];
 
+  const BACKEND_BASE_URL = "https://ai-resume-analyzer-z5p4.onrender.com";
+
   // Login handler
   const handleLogin = async () => {
     if (!username.trim()) {
@@ -38,7 +40,7 @@ function App() {
     }
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/login", {
+      const res = await axios.post(`${BACKEND_BASE_URL}`, {
         username,
       });
       setToken(res.data.accessToken);
@@ -86,7 +88,7 @@ function App() {
       try {
         setLoading(true);
         const response = await axios.post(
-          "http://localhost:5000/api/upload",
+          `${BACKEND_BASE_URL}/api/upload`,
           formData,
           {
             headers: {
