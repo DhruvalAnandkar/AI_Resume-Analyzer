@@ -30,7 +30,7 @@ function App() {
     "css",
   ];
 
-  const BACKEND_BASE_URL = "https://ai-resume-analyzer-z5p4.onrender.com";
+  const BACKEND_BASE_URL = "https://ai-resume-analyzer-z5p4.onrender.com/api/login";
 
   // Login handler
   const handleLogin = async () => {
