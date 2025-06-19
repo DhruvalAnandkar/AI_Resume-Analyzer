@@ -112,29 +112,33 @@ app.post("/api/upload", upload.single("resume"), async (req, res) => {
     });
     await resume.save();
 
-    const prompt = `
-You are an expert career coach.
+ const prompt = `
+You are an expert career coach for software engineers.
 
-Analyze the resume text below based on the following skill keywords:
-[${skillKeywords.map((s) => `"${s}"`).join(", ")}]
+Carefully analyze the following resume for:
+1. Technical breadth (skills in frontend, backend, cloud, databases, devops)
+2. Real-world project impact (e.g., metrics, team contribution, problem-solving)
+3. Clarity and relevance for modern full-stack engineering roles
 
-Return ONLY a valid JSON object with two fields:
+Then return a **strict JSON** object only like:
 {
-  "score": number (0-100),
-  "feedback": string (1-3 sentence advice to improve resume)
+  "score": number from 0 to 100,
+  "feedback": "Give 1–3 personalized improvement tips. Mention missing areas or skills. Make it unique."
 }
 
-Do not include any explanations or extra text.
+Do NOT return any extra text, explanations, or invalid JSON.
 
-Resume text:
+Resume:
+"""
 ${text}
+"""
 `;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-    });
+const completion = await openai.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [{ role: "user", content: prompt }],
+  temperature: 0.9,  // higher temp = more creative
+});
 
     const aiResponse = completion.choices[0].message.content;
     console.log("🔍 AI Raw Response:", aiResponse); // Optional: for debugging
