@@ -12,25 +12,20 @@ import OpenAI from "openai";
 dotenv.config();
 
 const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
+const pdfParse = require("pdf-parse");  // <== YOU INSTALL THIS LIBRARY BELOW
 
 const app = express();
 const upload = multer();
 
-// Enable CORS for frontend (Vercel URL or '*')
 app.use(cors({ origin: "*" }));
-
-// Allow larger file uploads (if needed)
 app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB error:", err));
 
-// Resume Schema
 const resumeSchema = new mongoose.Schema({
   filename: String,
   text: String,
@@ -39,20 +34,16 @@ const resumeSchema = new mongoose.Schema({
 });
 const Resume = mongoose.model("Resume", resumeSchema);
 
-// OpenAI Init
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Dummy user store
 const users = new Set();
 
-// Root route (health check)
 app.get("/", (req, res) => {
   res.send("✅ AI Resume Analyzer Backend is running!");
 });
 
-// Login Route
 app.post("/api/login", async (req, res) => {
   const { username } = req.body;
   if (!username) {
@@ -68,7 +59,6 @@ app.post("/api/login", async (req, res) => {
   return res.json({ accessToken });
 });
 
-// Upload Route
 app.post("/api/upload", upload.single("resume"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
@@ -98,8 +88,14 @@ app.post("/api/upload", upload.single("resume"), async (req, res) => {
       const result = await mammoth.extractRawText({ buffer: req.file.buffer });
       text = result.value;
     } else if (filename.endsWith(".pdf")) {
-      const result = await pdfParse(req.file.buffer);
-      text = result.text;
+      try {
+        const result = await pdfParse(req.file.buffer);
+        text = result.text;
+      } catch (e) {
+        return res.status(400).json({
+          error: "Error reading PDF file. Try uploading a .docx instead.",
+        });
+      }
     } else {
       return res.status(400).json({
         error: "Unsupported file format. Only .docx and .pdf allowed.",
@@ -141,15 +137,19 @@ ${text}
     });
 
     const aiResponse = completion.choices[0].message.content;
+    console.log("🔍 AI Raw Response:", aiResponse); // Optional: for debugging
 
     let aiAnalysis;
     try {
-      aiAnalysis = JSON.parse(aiResponse);
+      const match = aiResponse.match(/\{[\s\S]*?\}/); // Extract JSON safely
+      aiAnalysis = match ? JSON.parse(match[0]) : {
+        score: null,
+        feedback: "AI response could not be parsed. Try again later.",
+      };
     } catch (e) {
       aiAnalysis = {
         score: null,
-        feedback:
-          "Could not parse AI response. Please try again or improve your resume content.",
+        feedback: "Could not parse AI response. Please try again later.",
       };
     }
 
